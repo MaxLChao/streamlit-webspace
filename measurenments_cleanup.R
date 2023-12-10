@@ -69,13 +69,14 @@ for (x in dp_ids){
   # set up entry:
   json_meas = list()
   json_meas$title$text$headline = "Patient Timeline Summary:"
-  json_meas$title$text$text = paste0("ID: ",f_p[person_id ==x]$person_id,"\n ",
-                                     "Age: ",f_p[person_id ==x]$age, "\n ",
-                                     "Sex: ", f_p[person_id ==x]$gender_source_value, "\n ",
-                                     "Race: ", f_p[person_id ==x]$race_source_value, "\n ",
-                                     "Death Status: Yes \n ",
-                              "\n Taken from the measurements csv, mapping concept names to the measurement concept ids. 
-                              Values were filtered for dates. Note that these are NOT all inclusive and dates may be missing"
+  json_meas$title$text$text = paste0("<p>ID: ",f_p[person_id ==x]$person_id,"</p> ",
+                                     "<p>Age: ",f_p[person_id ==x]$age, "</p> ",
+                                     "<p>Sex: ", f_p[person_id ==x]$gender_source_value, "</p> ",
+                                     "<p>Race: ", f_p[person_id ==x]$race_source_value, "</p> ",
+                                     "<p>Death Status: Yes </p> ",
+                              "<p> Taken from the measurements csv, mapping concept names to the measurement concept ids. 
+                              Values were filtered for dates. Note that these are NOT all inclusive and dates may be missing
+                              </p>"
                               )
   iter = sdp[person_id ==x]
   events = lapply(1:(nrow(iter)+1),function(i){
@@ -105,7 +106,38 @@ for (x in dp_ids){
                        )
 }
 
-# take one person that is alive
+# take a couple people that are alive
+ap_ids = c("25990", "23594")
+for (x in ap_ids){
+  # set up entry:
+  json_meas = list()
+  json_meas$title$text$headline = "Patient Timeline Summary:"
+  json_meas$title$text$text = paste0("<p>ID: ",persondf[person_id ==x]$person_id,"</p> ",
+                                     "<p>Age: ",persondf[person_id ==x]$age, "</p> ",
+                                     "<p>Sex: ", persondf[person_id ==x]$gender_source_value, "</p> ",
+                                     "<p>Race: ", persondf[person_id ==x]$race_source_value, "</p> ",
+                                     "<p>Death Status: No </p> ",
+                                     "<p> Taken from the measurements csv, mapping concept names to the measurement concept ids. 
+                              Values were filtered for dates. Note that these are NOT all inclusive and dates may be missing
+                              </p>"
+  )
+  iter = wdp[person_id ==x]
+  events = lapply(1:nrow(iter),function(i){
+      list(
+        start_date = list(month = iter[i,]$month,
+                          day =iter[i,]$day,
+                          year = iter[i,]$year),
+        text = list(headline = iter[i,]$concept_class_id,
+                    text = iter[i,]$measurement_name)
+        
+      )
+  })
+  json_meas$events = events
+  jsonlite::write_json(json_meas, 
+                       paste0("~/Documents/code/streamlit-webspace/json/",
+                              x, ".json")
+  )
+}
 
 
 # for json$meas_events ... we have to map deeper for each concept
