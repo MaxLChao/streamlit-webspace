@@ -22,3 +22,6 @@ QoLs to improve:
 8. Incorporate more of the data not used.
 
 Check it out on [Streamlit Community Cloud](https://st-hello-app.streamlit.app/)
+
+v0.1 Officially live!
+[Link](https://bmi530-finalproject-eac5e44d4c623fc8.streamlit.app/)
