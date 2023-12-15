@@ -35,6 +35,8 @@ def run():
 
 
             ## Cleaning up person.csv
+            
+            From Ariadna: "Dropped concept ids for race, ethnicity and gender. Also dropped person source values as each person had a unique source value and I haven’t seen it in other files (unlike person id which is in measurements I believe). Ethnicity only gives two values. Dropped the month and year of birth and modified the datetime column to remove the time of birth (didn’t have time of birth just had a bunch of zeros)."
 
             ## Cleaning up measurements.csv
             
@@ -54,7 +56,11 @@ def run():
 
             
             ## Cleaning up condition_occurence.csv
+            
+            Worked with a subset of the data, dealing only with data with non NaNs that have expired. Leaves us with 730 patients who have expired of the 3166 with data entries about conditions they had. 
 
+            From Eliezer:"
+            Of the cases, I had to eliminate many patients for having so many NaNs in fields even after reductions of categories. But there is about 1000 patients that died that we could study further, how old they were when they died, gender, race, condition, confirmed diagnosis occurrence, observation, and visit id aligned with anything else you wish to pull from these. Many had comorbidities listed when they "expired". This could be interesting along with any other data we have been looking at."
 
             """)
     with tab2:
@@ -102,6 +108,8 @@ def run():
             """)
             race = p_df["race_source_value"].value_counts().rename_axis('race').reset_index(name='counts')
             fig = px.pie(race, values ='counts', names='race')
+            fig.layout.height = 700
+            fig.layout.width = 700
             st.plotly_chart(fig, use_container_width = True)
             st.dataframe(race, width=400, height=350)
         elif option_graphs == "occurence types":
@@ -151,9 +159,48 @@ def run():
     with tab4:
         st.header("Clinical Relationships with Death")
         cl_opts = st.selectbox("Select a Clinical Feature:",
-                     ("Sex", "Age", "Race", "Occurences"))
-        
+                               ("Overview","Sex", "Age", "Race"))
+        if cl_opts == "Overview":
+            st.markdown("""
+                ### Overview
 
+                Looking into the correlation of simple clinical features with respect to death. Included are for race, sex, and age against death.
+
+            """)
+            corrmat = pd.read_csv("tables/corrmat_death.csv")
+            st.dataframe(corrmat, width=600, height=520)
+        elif cl_opts == "Sex":
+            sdf = pd.read_csv("tables/sex_barplot.csv")
+            meth = st.selectbox("Display Method:", 
+                         ("Flat", "Percentage"))
+            if meth == "Flat":
+                fig = px.bar(sdf, x="sex", y='count', color='death',title="Death by Sex")
+                st.plotly_chart(fig, use_container_width = True)
+            elif meth == "Percentage":
+                sdf['percentage'] = sdf['count']/sdf.groupby('sex')['count'].transform('sum')
+                fig = px.bar(sdf, x='sex', y='percentage', color='death', title='Death by Sex')
+                st.plotly_chart(fig, use_container_width = True)
+        elif cl_opts == "Age":
+            pdf = pd.read_csv("tables/personDF.csv")
+            fig =px.box(pdf, x='death', y='age')
+            st.plotly_chart(fig, use_container_width = True)
+            st.markdown("""
+                Median age of Alive: 65
+                
+                Median age of Expired: 80
+            """)
+        elif cl_opts == "Race":
+            rdf = pd.read_csv("tables/race_barplot.csv")
+            meth = st.selectbox("Display Method:",
+                                ("Flat", "Percentage"))
+            if meth == "Flat":
+                fig = px.bar(rdf, x="race", y='count', color='death',title="Death by race")
+                st.plotly_chart(fig, use_container_width = True)
+            elif meth == "Percentage":
+                rdf['percentage'] = rdf['count']/rdf.groupby('race')['count'].transform('sum')
+                fig = px.bar(rdf, x='race', y='percentage', color='death', title='Death by race')
+                st.plotly_chart(fig, use_container_width = True)
+        
 
 if __name__ == "__main__":
     run()

@@ -17,6 +17,8 @@ QoLs to improve:
 3. Clean up some inefficiencies with the data loading, super lazy with data loading. Could possibly tell how many lines to load in via `pd.read_csv` instead of editing post.
 4. Should spend more time on occurences for not dead patients. What are those like?
 5. Figure out a way to clean up measurements better. Can see my work in the R files attached here.
-
+6. add occurences into clinical relationships
+7. Include the basic models
+8. Incorporate more of the data not used.
 
 Check it out on [Streamlit Community Cloud](https://st-hello-app.streamlit.app/)
