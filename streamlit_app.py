@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import time
 import plotly.figure_factory as ff
+import plotly.express as px
 
 # streamlit timeline
 import streamlit as st
@@ -14,7 +15,7 @@ LOGGER = get_logger(__name__)
 
 def run():
     st.set_page_config(layout="wide")
-    tab1, tab2, tab3 = st.tabs(["Background", "Cohort Description", "Patient History"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Background", "Cohort Description", "Patient History", "Clinical Relationships"])
     with tab1:
         st.header("Background")
         st.markdown("""
@@ -62,15 +63,81 @@ def run():
         p_df = pd.read_csv(file)
         option_graphs = st.selectbox(
                 "Select an overview: ",
-                ("age", "sex", "race", "occurence types"))
-        if option_graphs == "age":
-            fig = ff.create_distplot([p_df["age"]], ["Age of Cohort:"])
+                ("overview", "age", "sex", "race", "occurence types"))
+        
+        if option_graphs == "overview":
+            st.markdown("""
+            ### Patient Cohort description
+            
+            50740 unique patients, data taken from a cleaned person.csv found in the repo: [person.csv](https://github.com/MaxLChao/streamlit-webspace/blob/main/tables/personDF.csv). 
+
+            Here we include basic graphics on a few cohort descriptors including: age, sex, race and occurence types.   
+
+            ### PersonDF.csv 
+            """)
+            lines = st.slider("Select number of lines to visualize:", min_value=10, max_value=1000, value=10,
+                              step = 10)
+            st.table(p_df[["person_id", "gender_source_value", "race_source_value","death","age"]].head(n=lines))
+        elif option_graphs == "age":
+            fig = ff.create_distplot([p_df["age"]], ["Age (in Years)"])
             st.plotly_chart(fig, use_container_width = True)
             st.markdown("""
                 Summary:
+
                 Mean Age: 65.44
+                
                 Median Age: 66.00
+                
                         """)
+        elif option_graphs == "sex":
+            sdf = p_df["gender_source_value"].value_counts().rename_axis('Sex').reset_index(name='Count') 
+            fig = px.pie(sdf, values ='Count', names='Sex')
+            fig.layout.height=500
+            fig.layout.width=500
+            st.plotly_chart(fig, use_container_width = True)
+            st.dataframe(sdf, width=400, height=100)
+        elif option_graphs == "race":
+            st.markdown("""
+            ### Split by Race:
+            """)
+            race = p_df["race_source_value"].value_counts().rename_axis('race').reset_index(name='counts')
+            fig = px.pie(race, values ='counts', names='race')
+            st.plotly_chart(fig, use_container_width = True)
+            st.dataframe(race, width=400, height=350)
+        elif option_graphs == "occurence types":
+            st.markdown("""
+                ### Occurences Mapped by Deaths
+
+                Data cleaned for occurences by patients that have passed. There are multiple mappings to single patients.
+                Only 730 of the 3166 recorded patients that had expired had mappings to occurences.
+
+                The full listing of the occurences with the patient ids are available via: [EAfromAKSmergedDeath.csv](https://github.com/MaxLChao/streamlit-webspace/blob/main/tables/EAfromAKSmergedDeath.csv)
+                        """)
+            occ_opts = st.selectbox("Occurence Reviews: ",
+                         ("Occurence Overview","Top Conditions", "Condition Multimapping"))
+            if occ_opts == "Occurence Overview":
+                occ_df = pd.read_csv("tables/EAfromAKSmergedDeath.csv")
+                lines = st.slider("Select number of lines to visualize:", min_value =10, max_value = 1000, value = 10,
+                                  step = 10)
+                st.table(occ_df.head(n=lines))
+            elif occ_opts == "Top Conditions":
+                top_cons = pd.read_csv("tables/topconds.csv")
+                lines = st.slider("Select number of lines to visualize:", min_value =10, 
+                                  max_value = len(top_cons.index), value = 10,
+                                  step = 10)
+                st.table(top_cons.head(n=lines))
+            elif occ_opts == "Condition Multimapping":
+                idmat = pd.read_csv("tables/idmatrix_occ.csv", index_col=0)
+                rcs = st.slider("Select number of top occurences:", min_value =10, 
+                                max_value = len(idmat.index), value = 10,
+                                step = 10)
+                rcs = rcs - 1
+                plotmat = idmat.iloc[0:rcs,0:rcs]
+                #st.table(plotmat)
+                fig = px.imshow(plotmat)
+                fig.layout.width = 1000
+                fig.layout.height = 1000
+                st.plotly_chart(fig, use_container_width = True)
     with tab3:
         st.header("Patient History")
         option = st.selectbox(
@@ -80,6 +147,13 @@ def run():
         with open(file, "r") as f:
     	    data = f.read()
         timeline(data, height=800)
+
+    with tab4:
+        st.header("Clinical Relationships with Death")
+        cl_opts = st.selectbox("Select a Clinical Feature:",
+                     ("Sex", "Age", "Race", "Occurences"))
+        
+
 
 if __name__ == "__main__":
     run()
