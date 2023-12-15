@@ -3,7 +3,7 @@ from streamlit.logger import get_logger
 import numpy as np
 import pandas as pd
 import time
-#import plotly.express as px
+import plotly.figure_factory as ff
 
 # streamlit timeline
 import streamlit as st
@@ -58,6 +58,19 @@ def run():
             """)
     with tab2:
         st.header("Cohort Description")
+        file = "tables/personDF.csv"
+        p_df = pd.read_csv(file)
+        option_graphs = st.selectbox(
+                "Select an overview: ",
+                ("age", "sex", "race", "occurence types"))
+        if option_graphs == "age":
+            fig = ff.create_distplot([p_df["age"]], ["Age of Cohort:"])
+            st.plotly_chart(fig, use_container_width = True)
+            st.markdown("""
+                Summary:
+                Mean Age: 65.44
+                Median Age: 66.00
+                        """)
     with tab3:
         st.header("Patient History")
         option = st.selectbox(

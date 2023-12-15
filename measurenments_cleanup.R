@@ -1,7 +1,7 @@
 library(data.table)
 library(magrittr)
 p = fread("~/Downloads/1m_meas_wname.csv")
-persondf = fread("~/Downloads/personDF.csv")
+persondf = fread("tables/personDF.csv")
 birthyears = stringr::str_extract(persondf$birth_datetime, pattern = "[0-9]+") %>% as.numeric()
 deathyears = stringr::str_extract(persondf$death_date, pattern = "[0-9]+") %>% as.numeric()
 persondf$birthyear = birthyears
@@ -15,7 +15,7 @@ age = lapply(1:length(birthyears), function(i){
   }
 }) %>% unlist()
 persondf$age = age
-
+fwrite(persondf,"tables/personDF.csv")
 wdp = p[!is.na(p$measurement_date)]
 dates = wdp$measurement_date %>% stringr::str_split_fixed(., pattern = "-",n = 3) %>% as.data.frame()
 colnames(dates) = c("year", "month", "day")
