@@ -4,4 +4,5 @@ pandas
 pydeck
 streamlit
 plotly
+scipy
 streamlit_timeline
