@@ -1,5 +1,5 @@
 # Welcome to streamlit app for BMI 530 
-Project for Max Chao, Aridana Kim Silva, Haotian Xu, & Eliezer Arevera
+Project for Max Chao, Ariadna Kim Silva, Haotian Xu, & Eliezer Arevera
 
 Goals: Modeling Death in a patient cohort gathered by Janos Hajagos about length of stay.
 
