@@ -20,6 +20,7 @@ QoLs to improve:
 6. add occurences into clinical relationships
 7. Include the basic models
 8. Incorporate more of the data not used.
+9. Implement some of the model visualizations
 
 Check it out on [Streamlit Community Cloud](https://st-hello-app.streamlit.app/)
 
